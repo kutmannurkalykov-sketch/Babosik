@@ -1,10 +1,657 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удаление товара</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --neon-primary: #00e5ff;
+            --neon-secondary: #7c4dff;
+            --neon-pink: #ff2d95;
+            --neon-green: #4dffb8;
+            --neon-red: #ff4757;
+            --bg-panel: rgba(7, 10, 22, 0.6);
+            --text-main: #e6f3ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 800px at 10% 10%, #0b132b 0%, #090f20 40%, #060a17 70%), linear-gradient(135deg, #1b2a6b 0%, #311b92 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb.one { background: radial-gradient(circle at 30% 30%, rgba(255,71,87,0.65), rgba(255,45,149,0.55)); top: -100px; left: -120px; animation-delay: 0s; }
+        .orb.two { background: radial-gradient(circle at 70% 70%, rgba(255,45,149,0.55), rgba(124,77,255,0.45)); bottom: -120px; right: -150px; animation-delay: 5s; }
+        .orb.three { background: radial-gradient(circle at 40% 60%, rgba(255,71,87,0.55), rgba(255,45,149,0.45)); top: 40%; left: 60%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            50% { transform: translateY(-30px) translateX(20px) scale(1.05); }
+        }
+
+        .warning-card {
+            background: rgba(13, 18, 38, 0.85);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
+            animation: fadeInScale 0.6s ease;
+            border: 2px solid rgba(255,71,87,0.4);
+            box-shadow: 0 0 30px rgba(255,71,87,0.3), 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .warning-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: 24px;
+            background: linear-gradient(120deg, rgba(255,71,87,0.8), rgba(255,45,149,0.8), rgba(124,77,255,0.6));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: borderPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% { opacity: 0.7; filter: brightness(1); }
+            50% { opacity: 1; filter: brightness(1.2); }
+        }
+
+        .warning-icon {
+            font-size: 5em;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: shake 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255,71,87,0.8));
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-2deg) scale(1.05); }
+            20%, 40%, 60%, 80% { transform: rotate(2deg) scale(1.05); }
+        }
+
+        .warning-title {
+            font-size: 2.5em;
+            color: var(--text-main);
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255,71,87,0.6);
+            background: linear-gradient(90deg, #ff4757 0%, #ff2d95 50%, #ff4757 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(255,71,87,0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(255,71,87,0.8)); }
+        }
+
+        .warning-text {
+            text-align: center;
+            color: rgba(230,243,255,0.9);
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255,71,87,0.3);
+        }
+
+        .product-preview {
+            background: rgba(9, 14, 34, 0.6);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid rgba(0,229,255,0.2);
+            animation: slideIn 0.8s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .preview-title {
+            font-size: 1.4em;
+            color: var(--neon-primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-shadow: 0 0 12px rgba(0,229,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px 20px;
+            margin-bottom: 15px;
+        }
+
+        .preview-label {
+            color: rgba(230,243,255,0.7);
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .preview-value {
+            color: var(--text-main);
+            font-size: 1.1em;
+            word-break: break-word;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 20px auto;
+            display: block;
+            border: 2px solid rgba(0,229,255,0.3);
+            box-shadow: 0 0 20px rgba(0,229,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .preview-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0,229,255,0.4);
+        }
+
+        .no-image-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            color: var(--neon-primary);
+            font-size: 1.5em;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0,229,255,0.6);
+        }
+
+        .price-preview {
+            font-size: 1.8em;
+            color: #0b0f1a;
+            font-weight: 800;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary));
+            box-shadow: 0 0 20px rgba(0,229,255,0.5);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, var(--neon-green) 0%, #00b894 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(77,255,184,0.5);
+        }
+
+        .badge-used {
+            background: linear-gradient(135deg, #f093fb 0%, var(--neon-pink) 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(255,45,149,0.5);
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.2em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary), var(--neon-pink));
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            animation: gradientRotate 4s linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, rgba(255,71,87,0.25), rgba(255,45,149,0.25));
+            color: var(--text-main);
+            box-shadow: 0 0 25px rgba(255,71,87,0.5);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 0 40px rgba(255,71,87,0.8);
+            text-shadow: 0 0 20px rgba(255,71,87,0.9);
+            animation: dangerPulse 0.5s ease;
+        }
+
+        @keyframes dangerPulse {
+            0%, 100% { transform: translateY(-4px) scale(1.05); }
+            50% { transform: translateY(-4px) scale(1.08); }
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            color: var(--text-main);
+            box-shadow: 0 0 25px rgba(0,229,255,0.4);
+        }
+
+        .btn-cancel:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 0 40px rgba(0,229,255,0.7);
+            text-shadow: 0 0 20px rgba(0,229,255,0.8);
+        }
+
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-icon {
+            font-size: 1.3em;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .confirmation-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .confirmation-overlay.active {
+            display: flex;
+        }
+
+        .confirmation-box {
+            background: rgba(13, 18, 38, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            border: 2px solid rgba(255,71,87,0.5);
+            box-shadow: 0 0 50px rgba(255,71,87,0.4);
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .confirmation-text {
+            color: var(--text-main);
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, rgba(255,71,87,0.3), rgba(255,45,149,0.3));
+            color: var(--text-main);
+            box-shadow: 0 0 20px rgba(255,71,87,0.6);
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 0 35px rgba(255,71,87,0.9);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: rgba(13, 18, 38, 0.75);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0,229,255,0.25);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            border-color: rgba(0,229,255,0.5);
+            box-shadow: 0 0 25px rgba(0,229,255,0.4);
+            text-shadow: 0 0 10px rgba(0,229,255,0.6);
+        }
+
+        .form-container {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        form {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .warning-title {
+                font-size: 2em;
+            }
+
+            .warning-text {
+                font-size: 1.1em;
+            }
+
+            .warning-card {
+                padding: 30px 20px;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .preview-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        ::selection {
+            background: rgba(255,71,87,0.35);
+            color: #0b0f1a;
+        }
+    </style>
 </head>
 <body>
-$END$
+    <div class="bg">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'product_detail' object.pk %}" class="back-link">
+            ← Назад к товару
+        </a>
+
+        <div class="form-container">
+            <div class="warning-card">
+                <div class="warning-icon">⚠️</div>
+                <h1 class="warning-title">Внимание!</h1>
+                <p class="warning-text">Вы уверены, что хотите удалить этот товар?<br>Это действие нельзя отменить!</p>
+
+                <div class="product-preview">
+                    <div class="preview-title">
+                        <span>📦 Товар для удаления:</span>
+                    </div>
+
+                    {% if object.image %}
+                    <img src="{{ object.image.url }}" alt="{{ object.product_name }}" class="preview-image">
+                    {% else %}
+                    <div class="no-image-preview">📷 Нет фото</div>
+                    {% endif %}
+
+                    <div class="preview-info">
+                        <div class="preview-label">Название:</div>
+                        <div class="preview-value">{{ object.product_name }}</div>
+
+                        <div class="preview-label">Цена:</div>
+                        <div class="preview-value">
+                            <span class="price-preview">{{ object.price }} сом</span>
+                        </div>
+
+                        <div class="preview-label">Состояние:</div>
+                        <div class="preview-value">
+                            {% if object.product_type %}
+                            <span class="badge badge-new">✨ Новый</span>
+                            {% else %}
+                            <span class="badge badge-used">🔄 Б/у</span>
+                            {% endif %}
+                        </div>
+
+                        {% if object.phone_number %}
+                        <div class="preview-label">Контакты:</div>
+                        <div class="preview-value">{{ object.phone_number }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <div class="buttons-container">
+                        <button type="submit" class="btn btn-danger" id="deleteBtn">
+                            <span class="btn-icon">🗑️</span>
+                            <span>Удалить</span>
+                        </button>
+                        <a href="{% url 'product_list' %}" class="btn btn-cancel">
+                            <span class="btn-icon">↩️</span>
+                            <span>Отмена</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirmation-overlay" id="confirmationOverlay">
+        <div class="confirmation-box">
+            <div class="warning-icon" style="font-size: 3em; margin-bottom: 20px;">⚠️</div>
+            <p class="confirmation-text">Вы действительно хотите удалить этот товар?<br>Это действие необратимо!</p>
+            <div class="confirmation-buttons">
+                <button type="button" class="btn btn-confirm" id="finalConfirmBtn">
+                    <span>Да, удалить</span>
+                </button>
+                <button type="button" class="btn btn-cancel" id="cancelConfirmBtn">
+                    <span>Отмена</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const deleteForm = document.getElementById('deleteForm');
+            const confirmationOverlay = document.getElementById('confirmationOverlay');
+            const finalConfirmBtn = document.getElementById('finalConfirmBtn');
+            const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+
+            // Предотвращаем стандартную отправку формы
+            deleteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                confirmationOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            // Финальное подтверждение
+            finalConfirmBtn.addEventListener('click', function() {
+                confirmationOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // Добавляем эффект загрузки на кнопку
+                deleteBtn.style.opacity = '0.6';
+                deleteBtn.style.cursor = 'not-allowed';
+                deleteBtn.innerHTML = '<span class="btn-icon">⏳</span><span>Удаление...</span>';
+                
+                // Анимация перед отправкой
+                setTimeout(() => {
+                    deleteForm.submit();
+                }, 300);
+            });
+
+            // Отмена подтверждения
+            cancelConfirmBtn.addEventListener('click', function() {
+                confirmationOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            // Закрытие по клику вне окна
+            confirmationOverlay.addEventListener('click', function(e) {
+                if (e.target === confirmationOverlay) {
+                    confirmationOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Эффект при наведении на кнопку удаления
+            deleteBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.05)';
+            });
+
+            deleteBtn.addEventListener('mouseleave', function() {
+                if (!this.disabled) {
+                    this.style.transform = '';
+                }
+            });
+
+            // Анимация появления элементов
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInScale 0.6s ease';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const warningCard = document.querySelector('.warning-card');
+            if (warningCard) {
+                observer.observe(warningCard);
+            }
+
+            // Предупреждение при попытке уйти со страницы
+            let formSubmitted = false;
+
+            deleteForm.addEventListener('submit', function() {
+                formSubmitted = true;
+            });
+
+            window.addEventListener('beforeunload', function(e) {
+                if (!formSubmitted) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

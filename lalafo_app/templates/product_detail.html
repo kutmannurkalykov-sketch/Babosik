@@ -1,10 +1,568 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.product_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --neon-primary: #00e5ff;
+            --neon-secondary: #7c4dff;
+            --neon-pink: #ff2d95;
+            --neon-green: #4dffb8;
+            --bg-panel: rgba(7, 10, 22, 0.6);
+            --text-main: #e6f3ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 800px at 10% 10%, #0b132b 0%, #090f20 40%, #060a17 70%), linear-gradient(135deg, #1b2a6b 0%, #311b92 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb.one { background: radial-gradient(circle at 30% 30%, rgba(0,229,255,0.65), rgba(124,77,255,0.55)); top: -100px; left: -120px; animation-delay: 0s; }
+        .orb.two { background: radial-gradient(circle at 70% 70%, rgba(255,45,149,0.55), rgba(77,255,184,0.45)); bottom: -120px; right: -150px; animation-delay: 5s; }
+        .orb.three { background: radial-gradient(circle at 40% 60%, rgba(124,77,255,0.55), rgba(0,229,255,0.45)); top: 40%; left: 60%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            50% { transform: translateY(-30px) translateX(20px) scale(1.05); }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: rgba(13, 18, 38, 0.75);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0,229,255,0.25);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            border-color: rgba(0,229,255,0.5);
+            box-shadow: 0 0 25px rgba(0,229,255,0.4);
+            text-shadow: 0 0 10px rgba(0,229,255,0.6);
+        }
+
+        .product-detail-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .product-image-section {
+            background: rgba(13, 18, 38, 0.75);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            position: relative;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .product-image-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        @keyframes borderShine {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .image-container {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.2) 0%, rgba(124,77,255,0.25) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .image-container::after {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: -50%;
+            width: 60%;
+            height: 300%;
+            transform: rotate(25deg);
+            background: linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.35), rgba(255,255,255,0.0));
+            transition: transform 0.7s ease, opacity 0.7s ease;
+            opacity: 0;
+        }
+
+        .image-container:hover::after {
+            transform: translateX(250%) rotate(25deg);
+            opacity: 1;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.05);
+        }
+
+        .no-image {
+            color: var(--neon-primary);
+            font-size: 2em;
+            font-weight: 600;
+            text-shadow: 0 0 15px rgba(0,229,255,0.8);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .product-info-section {
+            background: rgba(13, 18, 38, 0.75);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            position: relative;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .product-info-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        .product-name {
+            font-size: 2.5em;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(124,77,255,0.5);
+            background: linear-gradient(90deg, #e6f3ff 0%, #00e5ff 50%, #7c4dff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(124,77,255,0.4)); }
+            50% { filter: drop-shadow(0 0 20px rgba(124,77,255,0.7)); }
+        }
+
+        .price-section {
+            margin: 30px 0;
+        }
+
+        .price-label {
+            font-size: 1.1em;
+            color: rgba(230,243,255,0.7);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .price {
+            font-size: 3em;
+            color: #0b0f1a;
+            font-weight: 800;
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary));
+            box-shadow: 0 0 25px rgba(0,229,255,0.6), 0 0 40px rgba(124,77,255,0.4);
+            animation: priceGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes priceGlow {
+            0%, 100% { box-shadow: 0 0 25px rgba(0,229,255,0.6), 0 0 40px rgba(124,77,255,0.4); }
+            50% { box-shadow: 0 0 35px rgba(0,229,255,0.8), 0 0 55px rgba(124,77,255,0.6); }
+        }
+
+        .info-item {
+            margin: 20px 0;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,229,255,0.15);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--neon-primary);
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(0,229,255,0.5);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value {
+            color: var(--text-main);
+            font-size: 1.2em;
+            margin-top: 5px;
+            word-break: break-word;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, var(--neon-green) 0%, #00b894 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(77,255,184,0.6);
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+
+        .badge-used {
+            background: linear-gradient(135deg, #f093fb 0%, var(--neon-pink) 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(255,45,149,0.6);
+            animation: badgePulse 3s ease-in-out infinite;
+            animation-delay: 1.2s;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.15); }
+        }
+
+        .description-section {
+            background: rgba(13, 18, 38, 0.75);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            margin-bottom: 30px;
+            position: relative;
+            animation: fadeIn 1s ease;
+        }
+
+        .description-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        .description-title {
+            font-size: 1.8em;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(124,77,255,0.4);
+        }
+
+        .description-text {
+            color: rgba(230,243,255,0.9);
+            font-size: 1.15em;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary), var(--neon-pink));
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: gradientRotate 4s linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            color: var(--text-main);
+            box-shadow: 0 0 20px rgba(0,229,255,0.4);
+        }
+
+        .btn-update:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(0,229,255,0.7);
+            text-shadow: 0 0 15px rgba(0,229,255,0.8);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, rgba(255,45,149,0.2), rgba(255,77,120,0.2));
+            color: var(--text-main);
+            box-shadow: 0 0 20px rgba(255,45,149,0.4);
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(255,45,149,0.7);
+            text-shadow: 0 0 15px rgba(255,45,149,0.8);
+        }
+
+        .action-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .date-info {
+            color: rgba(230,243,255,0.6);
+            font-size: 0.95em;
+            font-style: italic;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .product-detail-container {
+                grid-template-columns: 1fr;
+            }
+
+            .product-name {
+                font-size: 2em;
+            }
+
+            .price {
+                font-size: 2.5em;
+            }
+
+            .image-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 568px) {
+            .product-name {
+                font-size: 1.6em;
+            }
+
+            .price {
+                font-size: 2em;
+            }
+
+            .actions-section {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .image-container {
+                height: 300px;
+            }
+        }
+
+        ::selection {
+            background: rgba(0,229,255,0.35);
+            color: #0b0f1a;
+        }
+    </style>
 </head>
 <body>
-$END$
+    <div class="bg">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'product_list' %}" class="back-link">
+            ← Назад к списку
+        </a>
+
+        <div class="product-detail-container">
+            <div class="product-image-section">
+                <div class="image-container">
+{% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+{% else %}
+                    <span class="no-image">📷 Нет фото</span>
+{% endif %}
+                </div>
+            </div>
+
+            <div class="product-info-section">
+                <h1 class="product-name">{{ product.product_name }}</h1>
+
+                <div class="price-section">
+                    <div class="price-label">Цена</div>
+                    <div class="price">{{ product.price }} сом</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        📞 Контакты
+                    </div>
+                    <div class="info-value">{{ product.phone_number }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        🏷️ Состояние
+                    </div>
+                    <div class="info-value">
+{% if product.product_type %}
+                        <span class="badge badge-new">✨ Новый</span>
+{% else %}
+                        <span class="badge badge-used">🔄 Б/у</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        📅 Дата создания
+                    </div>
+                    <div class="info-value date-info">{{ product.created_date }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if product.description %}
+        <div class="description-section">
+            <h2 class="description-title">📝 Описание</h2>
+            <div class="description-text">{{ product.description }}</div>
+        </div>
+{% endif %}
+
+        <div class="actions-section">
+            <a href="{% url 'product_update' product.pk %}" class="action-btn btn-update">
+                <span>✏️ Изменить</span>
+            </a>
+            <a href="{% url 'product_delete' product.pk %}" class="action-btn btn-delete">
+                <span>🗑️ Удалить</span>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

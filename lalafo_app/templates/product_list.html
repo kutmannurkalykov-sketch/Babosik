@@ -1,10 +1,725 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все товары</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --neon-primary: #00e5ff;
+            --neon-secondary: #7c4dff;
+            --neon-pink: #ff2d95;
+            --neon-green: #4dffb8;
+            --bg-panel: rgba(7, 10, 22, 0.6);
+            --text-main: #e6f3ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 800px at 10% 10%, #0b132b 0%, #090f20 40%, #060a17 70%), linear-gradient(135deg, #1b2a6b 0%, #311b92 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb.one { background: radial-gradient(circle at 30% 30%, rgba(0,229,255,0.65), rgba(124,77,255,0.55)); top: -100px; left: -120px; animation-delay: 0s; }
+        .orb.two { background: radial-gradient(circle at 70% 70%, rgba(255,45,149,0.55), rgba(77,255,184,0.45)); bottom: -120px; right: -150px; animation-delay: 5s; }
+        .orb.three { background: radial-gradient(circle at 40% 60%, rgba(124,77,255,0.55), rgba(0,229,255,0.45)); top: 40%; left: 60%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            50% { transform: translateY(-30px) translateX(20px) scale(1.05); }
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            font-size: 3em;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #e6f3ff 0%, #00e5ff 25%, #7c4dff 50%, #ff2d95 75%, #e6f3ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 8px 24px rgba(0, 229, 255, 0.25)) drop-shadow(0 0 12px rgba(124,77,255,0.35));
+            animation: titleGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 12px rgba(255,255,255,0.25), 0 0 28px rgba(130, 177, 255, 0.25); }
+            50% { text-shadow: 0 0 18px rgba(255,255,255,0.45), 0 0 42px rgba(130, 177, 255, 0.45); }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+            position: sticky;
+            top: 10px;
+            z-index: 2;
+            backdrop-filter: blur(12px);
+            background: linear-gradient(135deg, rgba(10,14,30,0.7), rgba(9,12,26,0.6));
+            padding: 14px;
+            border-radius: 16px;
+            box-shadow: 0 0 0 1px rgba(0,229,255,0.25) inset, 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 26px rgba(124,77,255,0.25);
+        }
+
+        .search-input,
+        .select-input,
+        .range-input {
+            width: 100%;
+            padding: 12px 14px 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,229,255,0.25);
+            background: rgba(9, 14, 34, 0.65);
+            color: var(--text-main);
+            box-shadow: inset 0 0 8px rgba(0,229,255,0.1), 0 0 0 0 rgba(0,229,255,0);
+            outline: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            caret-color: var(--neon-primary);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            text-shadow: 0 0 6px rgba(124,77,255,0.25);
+        }
+
+        .search-input::placeholder,
+        .range-input::placeholder {
+            color: rgba(230,243,255,0.55);
+            text-shadow: 0 0 8px rgba(0,229,255,0.25);
+            animation: placeholderGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes placeholderGlow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .search-input:focus,
+        .select-input:focus,
+        .range-input:focus {
+            transform: translateY(-2px);
+            border-color: rgba(0,229,255,0.65);
+            box-shadow: 0 0 18px rgba(0,229,255,0.45), 0 0 36px rgba(124,77,255,0.25), inset 0 0 10px rgba(0,229,255,0.15);
+        }
+
+        /* Embedded search icon */
+        .search-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            background-size: 20px 20px;
+            padding-left: 44px;
+        }
+
+        .select-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 42px;
+            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2300e5ff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px 20px;
+        }
+
+        /* Dropdown options styling (supported in most modern browsers) */
+        .select-input option {
+            background: #0c1228;
+            color: var(--text-main);
+        }
+        .select-input option:checked {
+            background: linear-gradient(135deg, rgba(0,229,255,0.35), rgba(124,77,255,0.35));
+            color: #e6f3ff;
+        }
+
+        /* Number input spinners */
+        .range-input::-webkit-outer-spin-button,
+        .range-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .range-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Text selection colors */
+        ::selection {
+            background: rgba(0,229,255,0.35);
+            color: #0b0f1a;
+        }
+        input::selection, select::selection {
+            background: rgba(124,77,255,0.35);
+            color: #e6f3ff;
+        }
+
+        /* Autofill override */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text-main);
+            -webkit-box-shadow: 0 0 0px 1000px rgba(9, 14, 34, 0.65) inset;
+            box-shadow: 0 0 0px 1000px rgba(9, 14, 34, 0.65) inset;
+            transition: background-color 9999s ease-in-out 0s;
+            border: 1px solid rgba(0,229,255,0.45);
+        }
+
+        .range-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: var(--text-main);
+            font-weight: 600;
+            justify-content: flex-end;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            list-style: none;
+        }
+
+        .product-card {
+            background: rgba(13, 18, 38, 0.75);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            position: relative;
+            backdrop-filter: blur(6px);
+        }
+
+        .product-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        .product-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+
+        @keyframes borderShine {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .image-container {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.2) 0%, rgba(124,77,255,0.25) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .image-container::after {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: -50%;
+            width: 60%;
+            height: 300%;
+            transform: rotate(25deg);
+            background: linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.35), rgba(255,255,255,0.0));
+            transition: transform 0.7s ease, opacity 0.7s ease;
+            opacity: 0;
+        }
+
+        .image-container:hover::after {
+            transform: translateX(250%) rotate(25deg);
+            opacity: 1;
+        }
+
+        .no-image {
+            color: var(--neon-primary);
+            font-size: 1.2em;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(0,229,255,0.6);
+        }
+
+        .product-info {
+            padding: 25px;
+        }
+
+        .product-name {
+            font-size: 1.5em;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(124,77,255,0.35);
+        }
+
+        .product-detail {
+            margin: 12px 0;
+            color: rgba(230,243,255,0.8);
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+        }
+
+        .label {
+            font-weight: 600;
+            color: var(--neon-primary);
+            margin-right: 8px;
+            text-shadow: 0 0 10px rgba(0,229,255,0.45);
+        }
+
+        .price {
+            font-size: 1.8em;
+            color: #0b0f1a;
+            font-weight: 800;
+            margin: 15px 0;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary));
+            box-shadow: 0 0 18px rgba(0,229,255,0.55), 0 0 28px rgba(124,77,255,0.35);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, var(--neon-green) 0%, #00b894 100%);
+            color: white;
+            box-shadow: 0 0 14px rgba(77,255,184,0.55);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .badge-used {
+            background: linear-gradient(135deg, #f093fb 0%, var(--neon-pink) 100%);
+            color: white;
+            box-shadow: 0 0 14px rgba(255,45,149,0.55);
+            animation: pulse 3s ease-in-out infinite;
+            animation-delay: 1.2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateZ(0) scale(1); filter: brightness(1); }
+            50% { transform: translateZ(0) scale(1.03); filter: brightness(1.1); }
+        }
+
+        .date {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .image-container:hover img {
+            transform: scale(1.06);
+        }
+
+        .load-more-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 35px;
+        }
+
+        .load-more-btn {
+            padding: 12px 22px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--neon-primary) 0%, var(--neon-secondary) 100%);
+            color: #0b0f1a;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            box-shadow: 0 0 18px rgba(0,229,255,0.6), 0 0 34px rgba(124,77,255,0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(0,229,255,0.8), 0 0 44px rgba(124,77,255,0.6);
+            filter: brightness(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-main);
+            opacity: 0.9;
+            font-weight: 600;
+            padding: 20px 0;
+            text-shadow: 0 0 12px rgba(0,229,255,0.45);
+        }
+
+        .add-product-wrapper {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .add-product-btn {
+            position: relative;
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 16px;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(124,77,255,0.3), 0 0 60px rgba(255,45,149,0.2);
+            animation: buttonPulse 3s ease-in-out infinite;
+        }
+
+        .add-product-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary), var(--neon-pink), var(--neon-green), var(--neon-primary));
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: gradientRotate 4s linear infinite;
+            opacity: 0.9;
+        }
+
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(124,77,255,0.3), 0 0 60px rgba(255,45,149,0.2);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(124,77,255,0.5), 0 0 90px rgba(255,45,149,0.4);
+            }
+        }
+
+        .add-product-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            filter: brightness(1.15);
+            box-shadow: 0 0 35px rgba(0,229,255,0.8), 0 0 70px rgba(124,77,255,0.6), 0 0 100px rgba(255,45,149,0.5);
+        }
+
+        .add-product-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .add-product-btn a {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(124,77,255,0.15), rgba(255,45,149,0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,229,255,0.6), 0 0 20px rgba(124,77,255,0.4);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            background-clip: padding-box;
+        }
+
+        .add-product-btn a::before {
+            content: "✨";
+            margin-right: 8px;
+            filter: drop-shadow(0 0 8px rgba(0,229,255,0.8));
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+        }
+
+        .add-product-btn:hover a {
+            text-shadow: 0 0 15px rgba(0,229,255,0.9), 0 0 30px rgba(124,77,255,0.7), 0 0 45px rgba(255,45,149,0.5);
+            background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(124,77,255,0.25), rgba(255,45,149,0.2));
+        }
+
+        @media (max-width: 992px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .add-product-btn a {
+                padding: 14px 24px;
+                font-size: 0.95em;
+                letter-spacing: 0.5px;
+            }
+
+            .add-product-wrapper {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-$END$
+    <div class="bg">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+    </div>
+    <div class="container">
+        <h1>✨ Все товары ✨</h1>
+
+        <div class="controls">
+            <input id="search" class="search-input" type="text" placeholder="Поиск по названию...">
+            <select id="sort" class="select-input" aria-label="Сортировка">
+                <option value="created_desc">Сначала новые</option>
+                <option value="created_asc">Сначала старые</option>
+                <option value="price_asc">Цена: по возрастанию</option>
+                <option value="price_desc">Цена: по убыванию</option>
+            </select>
+            <select id="condition" class="select-input" aria-label="Состояние">
+                <option value="all">Все состояния</option>
+                <option value="new">Только новые</option>
+                <option value="used">Только б/у</option>
+            </select>
+            <div class="range-wrap">
+                <span>до</span>
+                <input id="maxPrice" class="range-input" type="number" min="0" step="1" placeholder="макс. цена">
+                <span>сом</span>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display:none">Ничего не найдено по заданным параметрам</div>
+
+        <ul id="grid" class="products-grid">
+            {% for i in products %}
+            <li class="product-card"
+                data-name="{{ i.product_name|lower }}"
+                data-price="{{ i.price }}"
+                data-created="{{ i.created_date|date:'U' }}"
+                data-condition="{% if i.product_type %}new{% else %}used{% endif %}">
+                <div class="image-container">
+                    {% if i.image %}
+                    <img src="{{ i.image.url }}" alt="{{ i.product_name }}" loading="lazy">
+                    {% else %}
+                    <span class="no-image">📷 Нет фото</span>
+                    {% endif %}
+                </div>
+
+                <div class="product-info">
+                    <h2 class="product-name"><a href="{% url 'product_detail' i.pk %}">{{ i.product_name }}</a></h2>
+
+                    <div class="price">{{ i.price }} сом</div>
+
+                    <div class="product-detail">
+                        <span class="label">Состояние:</span>
+                        {% if i.product_type %}
+                        <span class="badge badge-new">✨ Новый</span>
+                        {% else %}
+                        <span class="badge badge-used">🔄 Б/у</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="date">📅 Создано: {{ i.created_date }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="load-more-wrap">
+            <button id="loadMore" class="load-more-btn">Показать ещё</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const grid = document.getElementById('grid');
+            const cards = Array.from(grid.querySelectorAll('.product-card'));
+            const search = document.getElementById('search');
+            const sort = document.getElementById('sort');
+            const condition = document.getElementById('condition');
+            const maxPrice = document.getElementById('maxPrice');
+            const loadMoreBtn = document.getElementById('loadMore');
+            const emptyState = document.getElementById('emptyState');
+
+            const PAGE_SIZE = 9;
+            let currentPage = 1;
+            let currentList = cards;
+
+            // Reveal animation with IntersectionObserver
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            cards.forEach(card => io.observe(card));
+
+            function applyFilters() {
+                const query = (search.value || '').trim().toLowerCase();
+                const cond = condition.value;
+                const max = parseFloat(maxPrice.value);
+
+                let filtered = cards.filter(card => {
+                    const matchesName = !query || card.dataset.name.includes(query);
+                    const matchesCond = cond === 'all' || card.dataset.condition === cond;
+                    const price = parseFloat(card.dataset.price || '0');
+                    const matchesPrice = isNaN(max) || price <= max;
+                    return matchesName && matchesCond && matchesPrice;
+                });
+
+                // Sort
+                const [key, dir] = sort.value.split('_');
+                const dirMul = dir === 'asc' ? 1 : -1;
+                filtered.sort((a, b) => {
+                    if (key === 'price') {
+                        return (parseFloat(a.dataset.price) - parseFloat(b.dataset.price)) * dirMul;
+                    }
+                    if (key === 'created') {
+                        return (parseInt(a.dataset.created) - parseInt(b.dataset.created)) * dirMul;
+                    }
+                    return 0;
+                });
+
+                currentList = filtered;
+                currentPage = 1;
+                render();
+            }
+
+            function render() {
+                // Clear grid and re-append according to pagination
+                grid.innerHTML = '';
+                const total = currentList.length;
+                const end = Math.min(total, currentPage * PAGE_SIZE);
+                currentList.slice(0, end).forEach(card => {
+                    grid.appendChild(card);
+                    // re-observe for animation if needed
+                    if (!card.classList.contains('visible')) io.observe(card);
+                });
+
+                // Empty state
+                emptyState.style.display = total === 0 ? 'block' : 'none';
+
+                // Button visibility
+                loadMoreBtn.style.display = end < total ? 'inline-block' : 'none';
+            }
+
+            // Debounce for search
+            function debounce(fn, ms) {
+                let t;
+                return function(...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), ms);
+                };
+            }
+
+            const debouncedFilter = debounce(applyFilters, 200);
+
+            search.addEventListener('input', debouncedFilter);
+            sort.addEventListener('change', applyFilters);
+            condition.addEventListener('change', applyFilters);
+            maxPrice.addEventListener('input', debouncedFilter);
+
+            loadMoreBtn.addEventListener('click', () => {
+                currentPage += 1;
+                render();
+            });
+
+            // Initial render state
+            applyFilters();
+        })();
+    </script>
+
+    <div class="add-product-wrapper">
+        <button class="add-product-btn">
+            <a href="{% url 'product_create' %}">Добавить объявление</a>
+        </button>
+    </div>
+
 </body>
 </html>

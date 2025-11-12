@@ -12,374 +12,348 @@
         }
 
         body {
+            --neon-primary: #00e5ff;
+            --neon-secondary: #7c4dff;
+            --neon-pink: #ff2d95;
+            --neon-green: #4dffb8;
+            --bg-panel: rgba(7, 10, 22, 0.6);
+            --text-main: #e6f3ff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            background: radial-gradient(1200px 800px at 10% 10%, #0b132b 0%, #090f20 40%, #060a17 70%), linear-gradient(135deg, #1b2a6b 0%, #311b92 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
             min-height: 100vh;
-            padding: 60px 20px;
+            padding: 40px 20px;
             position: relative;
+            overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 20%);
-            pointer-events: none;
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
 
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb.one { background: radial-gradient(circle at 30% 30%, rgba(0,229,255,0.65), rgba(124,77,255,0.55)); top: -100px; left: -120px; animation-delay: 0s; }
+        .orb.two { background: radial-gradient(circle at 70% 70%, rgba(255,45,149,0.55), rgba(77,255,184,0.45)); bottom: -120px; right: -150px; animation-delay: 5s; }
+        .orb.three { background: radial-gradient(circle at 40% 60%, rgba(124,77,255,0.55), rgba(0,229,255,0.45)); top: 40%; left: 60%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            50% { transform: translateY(-30px) translateX(20px) scale(1.05); }
+        }
+
         .page-header {
             text-align: center;
-            margin-bottom: 70px;
-            animation: fadeIn 1s ease;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page-header h1 {
-            color: white;
-            font-size: 3.8em;
-            font-weight: 800;
-            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: var(--text-main);
+            font-size: 3em;
             margin-bottom: 20px;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #e6f3ff 0%, #00e5ff 25%, #7c4dff 50%, #ff2d95 75%, #e6f3ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 8px 24px rgba(0, 229, 255, 0.25)) drop-shadow(0 0 12px rgba(124,77,255,0.35));
+            animation: titleGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 12px rgba(255,255,255,0.25), 0 0 28px rgba(130, 177, 255, 0.25); }
+            50% { text-shadow: 0 0 18px rgba(255,255,255,0.45), 0 0 42px rgba(130, 177, 255, 0.45); }
         }
 
         .page-header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.4em;
+            color: rgba(230,243,255,0.9);
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(0,229,255,0.3);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: rgba(13, 18, 38, 0.75);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(0,229,255,0.25);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            border-color: rgba(0,229,255,0.5);
+            box-shadow: 0 0 25px rgba(0,229,255,0.4);
+            text-shadow: 0 0 10px rgba(0,229,255,0.6);
         }
 
         .categories-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 40px;
-            animation: fadeInUp 1.2s ease;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            list-style: none;
         }
 
-        /* Стиль 1: Минималистичная карточка */
-        .category-card.style-1 {
-            background: white;
+        .category-card {
+            background: rgba(13, 18, 38, 0.75);
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s ease;
-            border-left: 6px solid #3b82f6;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            position: relative;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
         }
 
-        .category-card.style-1:hover {
-            transform: translateX(10px);
-            box-shadow: 0 15px 50px rgba(59, 130, 246, 0.4);
+        .category-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .category-card.style-1 .icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        .category-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        @keyframes borderShine {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(124,77,255,0.15));
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-header::after {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: -50%;
+            width: 60%;
+            height: 300%;
+            transform: rotate(25deg);
+            background: linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.35), rgba(255,255,255,0.0));
+            transition: transform 0.7s ease, opacity 0.7s ease;
+            opacity: 0;
+        }
+
+        .category-card:hover .card-header::after {
+            transform: translateX(250%) rotate(25deg);
+            opacity: 1;
+        }
+
+        .category-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(0,229,255,0.4), inset 0 0 20px rgba(124,77,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .category-card:hover .category-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 40px rgba(0,229,255,0.6), inset 0 0 30px rgba(124,77,255,0.3);
+        }
+
+        .category-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary));
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 25px;
+            box-shadow: 0 0 20px rgba(0,229,255,0.5);
+            animation: iconPulse 3s ease-in-out infinite;
         }
 
-        .category-card.style-1 .title {
-            font-size: 1.8em;
-            color: #1e293b;
-            font-weight: 700;
-            margin-bottom: 12px;
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0,229,255,0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,229,255,0.7); }
         }
 
-        .category-card.style-1 .description {
-            color: #64748b;
-            font-size: 1em;
-            margin-bottom: 25px;
+        .category-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
         }
 
-        .category-card.style-1 .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #3b82f6;
-            font-weight: 600;
-            text-decoration: none;
-            transition: gap 0.3s ease;
-        }
-
-        .category-card.style-1 .btn:hover {
-            gap: 15px;
-        }
-
-        /* Стиль 2: Карточка с изображением сверху */
-        .category-card.style-2 {
-            background: white;
-            border-radius: 25px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s ease;
-        }
-
-        .category-card.style-2:hover {
-            transform: translateY(-15px) rotate(2deg);
-            box-shadow: 0 20px 60px rgba(126, 34, 206, 0.4);
-        }
-
-        .category-card.style-2 .image-header {
-            height: 160px;
-            background: linear-gradient(135deg, #7e22ce, #a855f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .category-card.style-2 .image-header::before {
-            content: '';
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            top: -100px;
-            right: -50px;
-        }
-
-        .category-card.style-2 .icon {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .card-body {
+            padding: 30px;
+            text-align: center;
             position: relative;
             z-index: 1;
         }
 
-        .category-card.style-2 .content {
-            padding: 30px;
-        }
-
-        .category-card.style-2 .title {
-            font-size: 1.7em;
-            color: #1e293b;
-            font-weight: 700;
+        .category-title {
+            font-size: 1.8em;
+            color: var(--text-main);
             margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(124,77,255,0.4);
+            transition: text-shadow 0.3s ease;
         }
 
-        .category-card.style-2 .btn {
+        .category-card:hover .category-title {
+            text-shadow: 0 0 20px rgba(124,77,255,0.6);
+        }
+
+        .category-subtitle {
+            color: rgba(230,243,255,0.7);
+            font-size: 1em;
+            margin-bottom: 25px;
+            text-shadow: 0 0 8px rgba(0,229,255,0.3);
+        }
+
+        .view-btn {
             display: inline-block;
-            background: linear-gradient(135deg, #7e22ce, #a855f7);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 25px;
+            padding: 14px 32px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--neon-primary) 0%, var(--neon-secondary) 100%);
+            color: #0b0f1a;
+            font-weight: 800;
+            letter-spacing: 0.4px;
             text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .category-card.style-2 .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(126, 34, 206, 0.4);
-        }
-
-        /* Стиль 3: Карточка с градиентным фоном */
-        .category-card.style-3 {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s ease;
-            color: white;
+            box-shadow: 0 0 18px rgba(0,229,255,0.6), 0 0 34px rgba(124,77,255,0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .category-card.style-3::before {
-            content: '';
+        .view-btn::before {
+            content: "";
             position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .view-btn:hover::before {
             width: 300px;
             height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            bottom: -150px;
-            right: -100px;
         }
 
-        .category-card.style-3:hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 60px rgba(239, 68, 68, 0.5);
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(0,229,255,0.8), 0 0 44px rgba(124,77,255,0.6);
+            filter: brightness(1.05);
         }
 
-        .category-card.style-3 .icon {
-            width: 75px;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
+        .view-btn span {
             position: relative;
             z-index: 1;
-        }
-
-        .category-card.style-3 .title {
-            font-size: 1.9em;
-            font-weight: 700;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .category-card.style-3 .description {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .category-card.style-3 .btn {
-            display: inline-block;
-            background: white;
-            color: #ef4444;
-            padding: 12px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        .category-card.style-3 .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
-        }
-
-        /* Стиль 4: Glassmorphism стиль */
-        .category-card.style-4 {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            transition: all 0.4s ease;
-            color: white;
-        }
-
-        .category-card.style-4:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .category-card.style-4 .icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-        }
-
-        .category-card.style-4 .title {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .category-card.style-4 .description {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1em;
-            margin-bottom: 25px;
-        }
-
-        .category-card.style-4 .btn {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1e3c72;
-            padding: 12px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .category-card.style-4 .btn:hover {
-            background: white;
-            transform: scale(1.05);
-        }
-
-        .icon svg {
-            width: 35px;
-            height: 35px;
-            fill: white;
-        }
-
-        .category-card.style-1 .icon svg {
-            fill: white;
-        }
-
-        .category-card.style-2 .icon svg {
-            fill: #7e22ce;
         }
 
         .empty-state {
             text-align: center;
             padding: 80px 40px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 30px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            background: rgba(13, 18, 38, 0.75);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            position: relative;
+            border: 1px solid rgba(0,229,255,0.25);
+            animation: fadeInUp 1s ease;
         }
 
-        .empty-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #3b82f6, #7e22ce);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-        }
-
-        .empty-icon svg {
-            width: 60px;
-            height: 60px;
-            fill: white;
-        }
-
-        .empty-state h2 {
-            color: #1e293b;
-            font-size: 2.5em;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .empty-state p {
-            color: #64748b;
-            font-size: 1.2em;
-            line-height: 1.6;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .empty-state::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
         }
 
         @keyframes fadeInUp {
@@ -393,18 +367,72 @@
             }
         }
 
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 30px rgba(0,229,255,0.4);
+            position: relative;
+            z-index: 1;
+            animation: emptyIconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes emptyIconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0,229,255,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0,229,255,0.6); }
+        }
+
+        .empty-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: var(--neon-primary);
+            filter: drop-shadow(0 0 10px rgba(0,229,255,0.6));
+        }
+
+        .empty-state h2 {
+            color: var(--text-main);
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(124,77,255,0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .empty-state p {
+            color: rgba(230,243,255,0.8);
+            font-size: 1.15em;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 8px rgba(0,229,255,0.3);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 40px 15px;
             }
 
             .page-header h1 {
-                font-size: 2.5em;
+                font-size: 2em;
+            }
+
+            .page-header p {
+                font-size: 1em;
             }
 
             .categories-container {
                 grid-template-columns: 1fr;
-                gap: 30px;
+                gap: 25px;
+            }
+
+            .category-card {
+                border-radius: 20px;
             }
         }
 
@@ -413,55 +441,51 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        ::selection {
+            background: rgba(0,229,255,0.35);
+            color: #0b0f1a;
+        }
     </style>
 </head>
 <body>
+    <div class="bg">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+    </div>
+
     <div class="container">
+        <a href="{% url 'product_list' %}" class="back-link">
+            ← Назад к товарам
+        </a>
+
         <div class="page-header">
-            <h1>🎨 Категории товаров</h1>
-            <p>Разнообразие стилей для каждой категории</p>
+            <h1>✨ Категории товаров ✨</h1>
+            <p>Изучите наши коллекции и найдите то, что вам нужно</p>
         </div>
 
         {% if categories %}
         <div class="categories-container">
             {% for category in categories %}
-                {% cycle 'style-1' 'style-2' 'style-3' 'style-4' as card_style silent %}
-                <div class="category-card {{ card_style }}">
-                    {% if card_style == 'style-2' %}
-                        <div class="image-header">
-                            <div class="icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="content">
-                            <h2 class="title">{{ category.category_name }}</h2>
-                            <a href="#" class="btn">Открыть →</a>
-                        </div>
-                    {% else %}
-                        <div class="icon">
+            <div class="category-card">
+                <div class="card-header">
+                    <div class="category-icon-wrapper">
+                        <div class="category-icon">
                             <svg viewBox="0 0 24 24">
-                                {% if card_style == 'style-1' %}
-                                    <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/>
-                                {% elif card_style == 'style-3' %}
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                {% else %}
-                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                                {% endif %}
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                             </svg>
                         </div>
-                        <h2 class="title">{{ category.category_name }}</h2>
-                        <p class="description">Исследуйте товары этой категории</p>
-                        <a href="#" class="btn">
-                            {% if card_style == 'style-1' %}
-                                Перейти →
-                            {% else %}
-                                Смотреть
-                            {% endif %}
-                        </a>
-                    {% endif %}
+                    </div>
                 </div>
+                <div class="card-body">
+                    <h2 class="category-title">{{ category.category_name }}</h2>
+                    <p class="category-subtitle">Посмотреть все товары</p>
+                    <a href="{% url 'product_list' %}" class="view-btn">
+                        <span>Перейти →</span>
+                    </a>
+                </div>
+            </div>
             {% endfor %}
         </div>
         {% else %}
@@ -472,9 +496,33 @@
                 </svg>
             </div>
             <h2>Категории отсутствуют</h2>
-            <p>Добавьте первую категорию, чтобы начать работу.<br>Каждая категория получит уникальный стиль!</p>
+            <p>В данный момент категории не добавлены.<br>Добавьте первую категорию, чтобы начать работу.</p>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        (function() {
+            // Анимация появления карточек
+            const cards = document.querySelectorAll('.category-card');
+            const observerOptions = {
+                threshold: 0.15,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            cards.forEach(card => observer.observe(card));
+        })();
+    </script>
 </body>
 </html>

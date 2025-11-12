@@ -1,10 +1,403 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить объявление</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --neon-primary: #00e5ff;
+            --neon-secondary: #7c4dff;
+            --neon-pink: #ff2d95;
+            --neon-green: #4dffb8;
+            --bg-panel: rgba(7, 10, 22, 0.6);
+            --text-main: #e6f3ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 800px at 10% 10%, #0b132b 0%, #090f20 40%, #060a17 70%), linear-gradient(135deg, #1b2a6b 0%, #311b92 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb.one { background: radial-gradient(circle at 30% 30%, rgba(0,229,255,0.65), rgba(124,77,255,0.55)); top: -100px; left: -120px; animation-delay: 0s; }
+        .orb.two { background: radial-gradient(circle at 70% 70%, rgba(255,45,149,0.55), rgba(77,255,184,0.45)); bottom: -120px; right: -150px; animation-delay: 5s; }
+        .orb.three { background: radial-gradient(circle at 40% 60%, rgba(124,77,255,0.55), rgba(0,229,255,0.45)); top: 40%; left: 60%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+            50% { transform: translateY(-30px) translateX(20px) scale(1.05); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            font-size: 3em;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #e6f3ff 0%, #00e5ff 25%, #7c4dff 50%, #ff2d95 75%, #e6f3ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 8px 24px rgba(0, 229, 255, 0.25)) drop-shadow(0 0 12px rgba(124,77,255,0.35));
+            animation: titleGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 12px rgba(255,255,255,0.25), 0 0 28px rgba(130, 177, 255, 0.25); }
+            50% { text-shadow: 0 0 18px rgba(255,255,255,0.45), 0 0 42px rgba(130, 177, 255, 0.45); }
+        }
+
+        form {
+            background: linear-gradient(135deg, rgba(10,14,30,0.7), rgba(9,12,26,0.6));
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 1px rgba(0,229,255,0.25) inset, 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 26px rgba(124,77,255,0.25);
+            position: relative;
+        }
+
+        form::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(0,229,255,0.85), rgba(124,77,255,0.85), rgba(255,45,149,0.85));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: borderShine 3.5s linear infinite;
+        }
+
+        @keyframes borderShine {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        form p {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        form label {
+            color: var(--neon-primary);
+            font-weight: 600;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(0,229,255,0.45);
+            letter-spacing: 0.5px;
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form textarea,
+        form select,
+        form input[type="file"] {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,229,255,0.25);
+            background: rgba(9, 14, 34, 0.65);
+            color: var(--text-main);
+            box-shadow: inset 0 0 8px rgba(0,229,255,0.1), 0 0 0 0 rgba(0,229,255,0);
+            outline: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            caret-color: var(--neon-primary);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            text-shadow: 0 0 6px rgba(124,77,255,0.25);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        form input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        form input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,229,255,0.5);
+            background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2));
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+            transition: all 0.2s ease;
+        }
+
+        form input[type="file"]::file-selector-button:hover {
+            background: linear-gradient(135deg, rgba(0,229,255,0.3), rgba(124,77,255,0.3));
+            box-shadow: 0 0 12px rgba(0,229,255,0.4);
+        }
+
+        form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        form input:focus,
+        form textarea:focus,
+        form select:focus {
+            transform: translateY(-2px);
+            border-color: rgba(0,229,255,0.65);
+            box-shadow: 0 0 18px rgba(0,229,255,0.45), 0 0 36px rgba(124,77,255,0.25), inset 0 0 10px rgba(0,229,255,0.15);
+        }
+
+        form input::placeholder,
+        form textarea::placeholder {
+            color: rgba(230,243,255,0.55);
+            text-shadow: 0 0 8px rgba(0,229,255,0.25);
+        }
+
+        form select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 42px;
+            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2300e5ff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px 20px;
+        }
+
+        form select option {
+            background: #0c1228;
+            color: var(--text-main);
+        }
+
+        form ul.errorlist {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+        }
+
+        form ul.errorlist li {
+            color: var(--neon-pink);
+            font-size: 0.9em;
+            text-shadow: 0 0 8px rgba(255,45,149,0.6);
+            margin-top: 5px;
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .submit-btn,
+        .back-btn-wrapper {
+            position: relative;
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 16px;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(124,77,255,0.3), 0 0 60px rgba(255,45,149,0.2);
+            animation: buttonPulse 3s ease-in-out infinite;
+        }
+
+        .submit-btn::before,
+        .back-btn-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--neon-primary), var(--neon-secondary), var(--neon-pink), var(--neon-green), var(--neon-primary));
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: gradientRotate 4s linear infinite;
+            opacity: 0.9;
+        }
+
+        @keyframes gradientRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(124,77,255,0.3), 0 0 60px rgba(255,45,149,0.2);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(124,77,255,0.5), 0 0 90px rgba(255,45,149,0.4);
+            }
+        }
+
+        .submit-btn:hover,
+        .back-btn-wrapper:hover {
+            transform: translateY(-4px) scale(1.05);
+            filter: brightness(1.15);
+            box-shadow: 0 0 35px rgba(0,229,255,0.8), 0 0 70px rgba(124,77,255,0.6), 0 0 100px rgba(255,45,149,0.5);
+        }
+
+        .submit-btn:active,
+        .back-btn-wrapper:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .submit-btn button,
+        .back-btn-wrapper a {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(124,77,255,0.15), rgba(255,45,149,0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,229,255,0.6), 0 0 20px rgba(124,77,255,0.4);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            background-clip: padding-box;
+            border: none;
+            cursor: pointer;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .submit-btn button::before {
+            content: "✨";
+            margin-right: 8px;
+            filter: drop-shadow(0 0 8px rgba(0,229,255,0.8));
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .back-btn-wrapper {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+        }
+
+        .back-btn-wrapper a::before {
+            content: "←";
+            margin-right: 8px;
+            filter: drop-shadow(0 0 8px rgba(0,229,255,0.8));
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+        }
+
+        .submit-btn:hover button,
+        .back-btn-wrapper:hover a {
+            text-shadow: 0 0 15px rgba(0,229,255,0.9), 0 0 30px rgba(124,77,255,0.7), 0 0 45px rgba(255,45,149,0.5);
+            background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(124,77,255,0.25), rgba(255,45,149,0.2));
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--neon-primary);
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            form {
+                padding: 25px;
+            }
+
+            .btn-wrapper {
+                flex-direction: column;
+            }
+
+            .submit-btn button,
+            .back-btn-wrapper a {
+                padding: 14px 24px;
+                font-size: 0.95em;
+            }
+
+            .back-btn-wrapper {
+                bottom: 20px;
+                left: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-$END$
+    <div class="bg">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+    </div>
+
+    <div class="container">
+        <h1>✨ Добавить объявление ✨</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="btn-wrapper">
+                <div class="submit-btn">
+                    <button type="submit">Добавить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="back-btn-wrapper">
+        <a href="{% url 'product_list' %}">Назад</a>
+    </div>
+
 </body>
 </html>
